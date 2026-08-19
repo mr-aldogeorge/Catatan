@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buku Agenda Kerja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1D2B4A;
+    --ink-soft:#4C5875;
+    --paper:#EFF1EC;
+    --paper-card:#FBFBF8;
+    --rule:#B7CBDA;
+    --rule-soft:#D7E2E9;
+    --red:#B23A32;
+    --red-soft:rgba(178,58,50,.10);
+    --green:#2E6F53;
+    --green-soft:rgba(46,111,83,.12);
+    --amber:#B4801F;
+    --amber-soft:rgba(180,128,31,.14);
+    --slate:#666F80;
+    --slate-soft:rgba(102,111,128,.12);
+    --blue:#2F4E8C;
+    --blue-soft:rgba(47,78,140,.10);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif{font-family:'Tinos',Georgia,'Times New Roman',serif;}
+  .mono{font-family:'JetBrains Mono','Courier New',monospace;}
+  .shell{
+    max-width:760px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--paper);
+    border-left:3px solid var(--red);
+    position:relative;
+  }
+  .shell::before{
+    content:"";
+    position:absolute;
+    left:34px; top:0; bottom:0;
+    width:1px;
+    background:var(--red-soft);
+    pointer-events:none;
+  }
+  header.kop{
+    padding:28px 20px 18px 44px;
+    border-bottom:2px solid var(--ink);
+    position:relative;
+  }
+  header.kop .eyebrow{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-family:'JetBrains Mono',monospace;
+  }
+  header.kop h1{
+    margin:4px 0 2px;
+    font-size:28px;
+    font-weight:700;
+  }
+  header.kop .sub{
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .kop-bottom{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    margin-top:14px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .today{
+    font-size:12px;
+    color:var(--ink-soft);
+    font-family:'JetBrains Mono',monospace;
+  }
+  .stamp-btn{
+    border:2px solid var(--red);
+    color:var(--red);
+    background:transparent;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:9px 16px;
+    border-radius:3px;
+    cursor:pointer;
+    transform:rotate(-1deg);
+    transition:transform .15s, background .15s, color .15s;
+  }
+  .stamp-btn:hover{ transform:rotate(0deg); background:var(--red); color:#fff; }
+
+  .stats{
+    display:flex;
+    padding:14px 20px 14px 44px;
+    gap:0;
+    flex-wrap:wrap;
+  }
+  .stat{
+    padding:0 16px;
+    border-right:1px solid var(--rule-soft);
+  }
+  .stat:first-child{padding-left:0;}
+  .stat:last-child{border-right:none;}
+  .stat .num{font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:700;}
+  .stat .lbl{font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft);}
+  .stat.warn .num{color:var(--red);}
+
+  .tabs{
+    display:flex;
+    gap:4px;
+    padding:0 20px 0 44px;
+    border-bottom:1px solid var(--rule-soft);
+    flex-wrap:wrap;
+  }
+  .tab{
+    background:none;
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    padding:9px 10px;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+  }
+  .tab.active{ color:var(--ink); border-bottom-color:var(--red); }
+  .tabs-right{ margin-left:auto; display:flex; gap:4px; }
+
+  .list{
+    padding:6px 16px 60px 40px;
+    background-image:repeating-linear-gradient(
+      to bottom,
+      transparent, transparent 47px,
+      var(--rule-soft) 47px, var(--rule-soft) 48px
+    );
+  }
+  .entry{
+    display:flex;
+    gap:10px;
+    padding:12px 8px 12px 6px;
+    cursor:pointer;
+    border-radius:4px;
+  }
+  .entry:hover{ background:rgba(0,0,0,.02); }
+  .entry .no{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    width:22px;
+    padding-top:3px;
+    flex-shrink:0;
+  }
+  .entry .main{ flex:1; min-width:0; }
+  .entry .title-row{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .entry .title{ font-weight:600; font-size:14.5px; }
+  .entry .title.done{ text-decoration:line-through; color:var(--ink-soft); font-weight:500; }
+  .badge-type{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:1px 6px;
+    border-radius:2px;
+  }
+  .badge-type.lisan{ border:1px dashed var(--ink-soft); color:var(--ink-soft); transform:rotate(-1deg); display:inline-block; }
+  .badge-type.tertulis{ border:1px solid var(--ink); color:var(--ink); }
+  .meta-row{ display:flex; align-items:center; gap:8px; margin-top:5px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-soft); }
+  .req{ }
+  .req::before{ content:"— diminta oleh "; }
+  .stamp{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding:2px 7px;
+    border-radius:2px;
+  }
+  .stamp.p-tinggi{ background:var(--red-soft); color:var(--red); }
+  .stamp.p-sedang{ background:var(--amber-soft); color:var(--amber); }
+  .stamp.p-rendah{ background:var(--slate-soft); color:var(--slate); }
+  .stamp.s-baru{ background:var(--blue-soft); color:var(--blue); }
+  .stamp.s-proses{ background:var(--amber-soft); color:var(--amber); }
+  .stamp.s-tertunda{ background:var(--slate-soft); color:var(--slate); }
+  .stamp.s-selesai{ background:var(--green-soft); color:var(--green); }
+  .deadline{ font-family:'JetBrains Mono',monospace; font-size:11px; }
+  .deadline.overdue{ color:var(--red); font-weight:700; }
+  .deadline.soon{ color:var(--amber); font-weight:700; }
+  .progress-count{ font-size:11px; color:var(--ink-soft); }
+
+  .empty{
+    padding:60px 20px 20px 6px;
+    text-align:center;
+    color:var(--ink-soft);
+  }
+  .empty .serif{ font-size:18px; color:var(--ink); display:block; margin-bottom:6px; }
+
+  /* Modal */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(29,43,74,.45);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+    padding:0;
+  }
+  .overlay.open{ display:flex; }
+  .modal{
+    background:var(--paper-card);
+    width:100%;
+    max-width:560px;
+    max-height:92vh;
+    overflow-y:auto;
+    border-radius:14px 14px 0 0;
+    padding:20px 20px 28px;
+    border-top:3px solid var(--red);
+  }
+  @media(min-width:640px){
+    .overlay{ align-items:center; padding:20px; }
+    .modal{ border-radius:6px; border-top:3px solid var(--red); max-height:88vh; }
+  }
+  .modal h2{ font-family:'Tinos',serif; font-size:20px; margin:0 0 2px; }
+  .modal .modal-sub{ font-size:11px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; margin-bottom:16px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:5px; font-weight:600; }
+  .field input[type=text], .field input[type=date], .field textarea{
+    width:100%;
+    border:1px solid var(--rule);
+    background:#fff;
+    border-radius:4px;
+    padding:9px 10px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .field textarea{ min-height:70px; resize:vertical; }
+  .seg{ display:flex; gap:6px; }
+  .seg button{
+    flex:1;
+    padding:8px 6px;
+    border:1px solid var(--rule);
+    background:#fff;
+    border-radius:4px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .seg button.sel{ border-color:currentColor; }
+  .seg button.sel.pri-tinggi{ background:var(--red-soft); color:var(--red); }
+  .seg button.sel.pri-sedang{ background:var(--amber-soft); color:var(--amber); }
+  .seg button.sel.pri-rendah{ background:var(--slate-soft); color:var(--slate); }
+  .seg button.sel.type-lisan{ background:var(--slate-soft); color:var(--ink); border-style:dashed; }
+  .seg button.sel.type-tertulis{ background:var(--blue-soft); color:var(--blue); }
+  .row2{ display:flex; gap:12px; }
+  .row2 > *{ flex:1; }
+  .modal-actions{ display:flex; gap:10px; margin-top:20px; }
+  .btn-primary{
+    flex:1;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    padding:11px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .btn-ghost{
+    background:none;
+    border:1px solid var(--rule);
+    color:var(--ink-soft);
+    border-radius:4px;
+    padding:11px 16px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .close-x{
+    position:absolute; top:14px; right:16px;
+    background:none; border:none; font-size:20px; color:var(--ink-soft); cursor:pointer;
+    line-height:1;
+  }
+  .modal{ position:relative; }
+
+  /* Detail modal specifics */
+  .detail-meta{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 16px; }
+  .status-picker{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; }
+  .status-picker button{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+    padding:5px 10px; border-radius:2px; border:1px solid transparent; cursor:pointer;
+  }
+  .desc-block{ font-size:13.5px; line-height:1.5; color:var(--ink); background:#fff; border:1px solid var(--rule-soft); border-radius:4px; padding:10px 12px; margin-bottom:18px; white-space:pre-wrap; }
+  .log{ border-left:1px solid var(--rule); padding-left:14px; margin-left:4px; }
+  .log-item{ position:relative; padding-bottom:14px; }
+  .log-item::before{
+    content:""; position:absolute; left:-18px; top:5px;
+    width:7px; height:7px; border-radius:50%; background:var(--red);
+  }
+  .log-date{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-soft); }
+  .log-text{ font-size:13.5px; margin-top:2px; white-space:pre-wrap; }
+  .log-empty{ font-size:12.5px; color:var(--ink-soft); font-style:italic; padding-left:14px; margin-left:4px; }
+  .addnote{ margin-top:16px; }
+  .danger-link{ color:var(--red); background:none; border:none; font-size:12px; cursor:pointer; padding:0; text-decoration:underline; margin-top:18px; }
+
+  .loading{ padding:80px 20px; text-align:center; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; font-size:13px; }
+</style>
+</head>
+<body>
+
+<div class="shell" id="app">
+  <div class="loading">Memuat catatan…</div>
+</div>
+
+<div class="overlay" id="formOverlay">
+  <div class="modal">
+    <button class="close-x" onclick="closeForm()">✕</button>
+    <h2 id="formTitle">Entri Baru</h2>
+    <div class="modal-sub">LEMBAR TUGAS</div>
+    <form id="taskForm" onsubmit="return saveForm(event)">
+      <div class="field">
+        <label>Uraian Tugas</label>
+        <input type="text" id="f-title" placeholder="mis. Siapkan draft SK panitia" required>
+      </div>
+      <div class="field">
+        <label>Keterangan (opsional)</label>
+        <textarea id="f-desc" placeholder="Detail tambahan…"></textarea>
+      </div>
+      <div class="field">
+        <label>Diminta oleh</label>
+        <input type="text" id="f-requester" placeholder="mis. Wadir II">
+      </div>
+      <div class="field">
+        <label>Cara Penyampaian</label>
+        <div class="seg" id="f-type">
+          <button type="button" data-val="Lisan" onclick="pickType('Lisan')">Lisan</button>
+          <button type="button" data-val="Tertulis" onclick="pickType('Tertulis')">Tertulis</button>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Tenggat (opsional)</label>
+          <input type="date" id="f-deadline">
+        </div>
+        <div class="field">
+          <label>Prioritas</label>
+          <div class="seg" id="f-priority">
+            <button type="button" data-val="Rendah" onclick="pickPriority('Rendah')">Rendah</button>
+            <button type="button" data-val="Sedang" onclick="pickPriority('Sedang')">Sedang</button>
+            <button type="button" data-val="Tinggi" onclick="pickPriority('Tinggi')">Tinggi</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeForm()">Batal</button>
+        <button type="submit" class="btn-primary">Simpan Entri</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="overlay" id="detailOverlay">
+  <div class="modal" id="detailModal"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'tasks-data';
+let state = { tasks: [], filter: 'Semua', typeFilter: 'Semua', loading: true, formType: 'Lisan', formPriority: 'Sedang', editingId: null, viewingId: null };
+
+const STATUS_LIST = ['Baru','Proses','Tertunda','Selesai'];
+const STATUS_LABEL = { Baru:'Baru', Proses:'Proses', Tertunda:'Tertunda', Selesai:'Selesai' };
+const PRIORITY_WEIGHT = { Tinggi:0, Sedang:1, Rendah:2 };
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function uid(){ return 't_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.round((new Date(a) - new Date(b)) / 86400000); }
+
+function formatDateID(iso){
+  if(!iso) return '';
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const d = new Date(iso + 'T00:00:00');
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+function formatDateTimeID(iso){
+  const d = new Date(iso);
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  return d.getDate() + ' ' + months[d.getMonth()] + ' · ' + hh + ':' + mm;
+}
+function todayHeaderID(){
+  const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const d = new Date();
+  return days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function loadTasks(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state.tasks = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    state.tasks = [];
+  }
+  state.loading = false;
+  render();
+}
+function persist(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.tasks));
+  }catch(e){
+    console.error('Gagal menyimpan', e);
+  }
+}
+
+function isOverdue(t){ return t.deadline && t.status!=='Selesai' && daysBetween(t.deadline, todayISO()) < 0; }
+function isSoon(t){ return t.deadline && t.status!=='Selesai' && !isOverdue(t) && daysBetween(t.deadline, todayISO()) <= 2; }
+
+function computeStats(){
+  const s = { Baru:0, Proses:0, Tertunda:0, Selesai:0, overdue:0 };
+  state.tasks.forEach(t=>{
+    s[t.status] = (s[t.status]||0) + 1;
+    if(isOverdue(t)) s.overdue++;
+  });
+  return s;
+}
+
+function sortedFiltered(){
+  let list = state.tasks.slice();
+  if(state.filter !== 'Semua') list = list.filter(t => t.status === state.filter);
+  if(state.typeFilter !== 'Semua') list = list.filter(t => t.type === state.typeFilter);
+  list.sort((a,b)=>{
+    const aDone = a.status==='Selesai' ? 1 : 0;
+    const bDone = b.status==='Selesai' ? 1 : 0;
+    if(aDone !== bDone) return aDone - bDone;
+    const aDl = a.deadline || '9999-12-31';
+    const bDl = b.deadline || '9999-12-31';
+    if(aDl !== bDl) return aDl < bDl ? -1 : 1;
+    return PRIORITY_WEIGHT[a.priority] - PRIORITY_WEIGHT[b.priority];
+  });
+  return list;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  if(state.loading){
+    app.innerHTML = '<div class="loading">Memuat catatan…</div>';
+    return;
+  }
+  const stats = computeStats();
+  const list = sortedFiltered();
+
+  const tabsHtml = ['Semua', ...STATUS_LIST].map(f => {
+    const label = f === 'Semua' ? 'Semua' : STATUS_LABEL[f];
+    return `<button class="tab ${state.filter===f?'active':''}" onclick="setFilter('${f}')">${label}</button>`;
+  }).join('');
+
+  const typeTabsHtml = ['Semua','Lisan','Tertulis'].map(f =>
+    `<button class="tab ${state.typeFilter===f?'active':''}" onclick="setTypeFilter('${f}')">${f}</button>`
+  ).join('');
+
+  let listHtml = '';
+  if(list.length === 0){
+    listHtml = `<div class="empty"><span class="serif">Belum ada entri di sini.</span>Catat tugas atau arahan pertama Anda.</div>`;
+  } else {
+    listHtml = list.map((t, i) => {
+      const badge = t.type === 'Lisan'
+        ? `<span class="badge-type lisan">Lisan</span>`
+        : `<span class="badge-type tertulis">Tertulis</span>`;
+      let dl = '';
+      if(t.deadline){
+        const cls = isOverdue(t) ? 'overdue' : (isSoon(t) ? 'soon' : '');
+        const dlLabel = isOverdue(t) ? 'Lewat ' + formatDateID(t.deadline) : formatDateID(t.deadline);
+        dl = `<span class="deadline ${cls}">⏰ ${dlLabel}</span>`;
+      }
+      const noteCount = (t.progressNotes||[]).length;
+      return `
+      <div class="entry" onclick="openDetail('${t.id}')">
+        <div class="no">${String(i+1).padStart(2,'0')}</div>
+        <div class="main">
+          <div class="title-row">
+            <span class="title ${t.status==='Selesai'?'done':''}">${escapeHtml(t.title)}</span>
+            ${badge}
+          </div>
+          <div class="meta-row">
+            ${t.requester ? `<span class="req">${escapeHtml(t.requester)}</span>` : ''}
+            <span class="stamp p-${t.priority.toLowerCase()}">${t.priority}</span>
+            <span class="stamp s-${t.status.toLowerCase()}">${STATUS_LABEL[t.status]}</span>
+            ${dl}
+            ${noteCount ? `<span class="progress-count">${noteCount} catatan</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  app.innerHTML = `
+    <header class="kop">
+      <div class="eyebrow">Sekretariat Wakil Direktur II</div>
+      <h1 class="serif">Buku Agenda Kerja</h1>
+      <div class="sub">Poltekkes Kemenkes Jayapura</div>
+      <div class="kop-bottom">
+        <div class="today">${todayHeaderID()}</div>
+        <button class="stamp-btn" onclick="openForm()">+ Entri Baru</button>
+      </div>
+    </header>
+    <div class="stats">
+      <div class="stat"><div class="num">${stats.Baru||0}</div><div class="lbl">Baru</div></div>
+      <div class="stat"><div class="num">${stats.Proses||0}</div><div class="lbl">Proses</div></div>
+      <div class="stat"><div class="num">${stats.Tertunda||0}</div><div class="lbl">Tertunda</div></div>
+      <div class="stat"><div class="num">${stats.Selesai||0}</div><div class="lbl">Selesai</div></div>
+      <div class="stat ${stats.overdue?'warn':''}"><div class="num">${stats.overdue||0}</div><div class="lbl">Terlambat</div></div>
+    </div>
+    <div class="tabs">
+      ${tabsHtml}
+      <div class="tabs-right">${typeTabsHtml}</div>
+    </div>
+    <div class="list">${listHtml}</div>
+  `;
+}
+
+function setFilter(f){ state.filter = f; render(); }
+function setTypeFilter(f){ state.typeFilter = f; render(); }
+
+// ---- Form (add) ----
+function openForm(){
+  state.editingId = null;
+  document.getElementById('formTitle').textContent = 'Entri Baru';
+  document.getElementById('taskForm').reset();
+  state.formType = 'Lisan';
+  state.formPriority = 'Sedang';
+  syncFormSegments();
+  document.getElementById('formOverlay').classList.add('open');
+}
+function closeForm(){ document.getElementById('formOverlay').classList.remove('open'); }
+function pickType(v){ state.formType = v; syncFormSegments(); }
+function pickPriority(v){ state.formPriority = v; syncFormSegments(); }
+function syncFormSegments(){
+  document.querySelectorAll('#f-type button').forEach(b=>{
+    b.classList.toggle('sel', b.dataset.val === state.formType);
+    b.classList.toggle('type-lisan', b.dataset.val==='Lisan' && b.dataset.val===state.formType);
+    b.classList.toggle('type-tertulis', b.dataset.val==='Tertulis' && b.dataset.val===state.formType);
+  });
+  document.querySelectorAll('#f-priority button').forEach(b=>{
+    const sel = b.dataset.val === state.formPriority;
+    b.classList.toggle('sel', sel);
+    b.classList.toggle('pri-tinggi', sel && b.dataset.val==='Tinggi');
+    b.classList.toggle('pri-sedang', sel && b.dataset.val==='Sedang');
+    b.classList.toggle('pri-rendah', sel && b.dataset.val==='Rendah');
+  });
+}
+function saveForm(e){
+  e.preventDefault();
+  const title = document.getElementById('f-title').value.trim();
+  if(!title) return false;
+  const desc = document.getElementById('f-desc').value.trim();
+  const requester = document.getElementById('f-requester').value.trim();
+  const deadline = document.getElementById('f-deadline').value || null;
+  const nowIso = new Date().toISOString();
+  const task = {
+    id: uid(),
+    title, description: desc, requester,
+    type: state.formType, priority: state.formPriority,
+    status: 'Baru', deadline,
+    createdAt: nowIso, updatedAt: nowIso,
+    progressNotes: []
+  };
+  state.tasks.unshift(task);
+  persist();
+  closeForm();
+  render();
+  return false;
+}
+
+// ---- Detail ----
+function openDetail(id){
+  state.viewingId = id;
+  renderDetail();
+  document.getElementById('detailOverlay').classList.add('open');
+}
+function closeDetail(){
+  document.getElementById('detailOverlay').classList.remove('open');
+  state.viewingId = null;
+}
+function renderDetail(){
+  const t = state.tasks.find(x => x.id === state.viewingId);
+  if(!t){ closeDetail(); return; }
+  const statusButtons = STATUS_LIST.map(s => `
+    <button class="stamp s-${s.toLowerCase()}" style="opacity:${t.status===s?1:0.45}" onclick="setStatus('${t.id}','${s}')">${STATUS_LABEL[s]}</button>
+  `).join('');
+  const dl = t.deadline
+    ? `<span class="deadline ${isOverdue(t)?'overdue':(isSoon(t)?'soon':'')}">⏰ ${isOverdue(t)?'Lewat ':''}${formatDateID(t.deadline)}</span>`
+    : '';
+  const notesHtml = (t.progressNotes && t.progressNotes.length)
+    ? `<div class="log">${t.progressNotes.slice().reverse().map(n => `
+        <div class="log-item">
+          <div class="log-date">${formatDateTimeID(n.date)}</div>
+          <div class="log-text">${escapeHtml(n.text)}</div>
+        </div>`).join('')}</div>`
+    : `<div class="log-empty">Belum ada catatan progres.</div>`;
+
+  document.getElementById('detailModal').innerHTML = `
+    <button class="close-x" onclick="closeDetail()">✕</button>
+    <h2 class="serif">${escapeHtml(t.title)}</h2>
+    <div class="modal-sub">LEMBAR TUGAS · ${t.type === 'Lisan' ? 'DISAMPAIKAN LISAN' : 'DISAMPAIKAN TERTULIS'}</div>
+    <div class="detail-meta">
+      ${t.requester ? `<span class="req" style="font-size:12px;color:var(--ink-soft)">${escapeHtml(t.requester)}</span>` : ''}
+      <span class="stamp p-${t.priority.toLowerCase()}">${t.priority}</span>
+      ${dl}
+    </div>
+    ${t.description ? `<div class="desc-block">${escapeHtml(t.description)}</div>` : ''}
+    <div class="field">
+      <label>Status</label>
+      <div class="status-picker">${statusButtons}</div>
+    </div>
+    <div class="field">
+      <label>Catatan Progres</label>
+      ${notesHtml}
+      <div class="addnote">
+        <textarea id="noteInput" placeholder="Tulis perkembangan terbaru…"></textarea>
+        <div class="modal-actions" style="margin-top:8px;">
+          <button class="btn-primary" onclick="addNote('${t.id}')">Tambah Catatan</button>
+        </div>
+      </div>
+    </div>
+    <button class="danger-link" onclick="deleteTask('${t.id}')">Hapus entri ini</button>
+  `;
+}
+function setStatus(id, status){
+  const t = state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.status = status;
+  t.updatedAt = new Date().toISOString();
+  persist();
+  renderDetail();
+  render();
+}
+function addNote(id){
+  const t = state.tasks.find(x=>x.id===id);
+  const input = document.getElementById('noteInput');
+  const text = input.value.trim();
+  if(!t || !text) return;
+  t.progressNotes = t.progressNotes || [];
+  t.progressNotes.push({ id: uid(), date: new Date().toISOString(), text });
+  t.updatedAt = new Date().toISOString();
+  if(t.status === 'Baru') t.status = 'Proses';
+  persist();
+  renderDetail();
+  render();
+}
+function deleteTask(id){
+  if(!confirm('Hapus entri ini beserta seluruh catatan progresnya?')) return;
+  state.tasks = state.tasks.filter(x=>x.id!==id);
+  persist();
+  closeDetail();
+  render();
+}
+
+document.getElementById('formOverlay').addEventListener('click', e=>{ if(e.target.id==='formOverlay') closeForm(); });
+document.getElementById('detailOverlay').addEventListener('click', e=>{ if(e.target.id==='detailOverlay') closeDetail(); });
+
+loadTasks();
+</script>
+</body>
+</html>
